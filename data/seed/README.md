@@ -26,4 +26,4 @@ The first five are your files, unmodified. `sku_pricing.csv` is **mine**.
 ## Two facts that shape the numbers
 
 - **As-of date = the stock snapshot date** (`2026-10-19`), not the machine clock. October is a festival month in `calendar.csv`, so the +25% demand uplift is applied.
-- The brief mentions 1,200 distributors and Goa; the supplied data has 4 distributors in Maharashtra, Karnataka and Gujarat. The schema handles any number; only this sample is small.
+- The supplied data is used as-is: 4 distributors (Maharashtra, Karnataka, Gujarat) and 15 SKUs. The brief mentions 1,200 distributors and Goa, so if more rows exist elsewhere, drop them into the same CSV files and re-run `npm run db:seed` — the schema and engine handle any number.

@@ -147,7 +147,7 @@ async function ImpactSection() {
         <div className="p-5">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-[13px] font-semibold text-ink">Loss exposure on the shelf today</h2>
-            <span className="text-xs text-ink-3">{impact.skuCount} SKUs in the loaded dataset</span>
+            <span className="text-xs text-ink-3">{impact.skuCount} SKUs · from your stock and sales data</span>
           </div>
 
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
@@ -186,7 +186,7 @@ async function ImpactSection() {
 
           <div className="mt-5 flex flex-wrap items-start gap-x-6 gap-y-2 rounded-lg bg-surface-2 px-3 py-2.5 text-xs text-ink-2">
             <p>
-              <span className="font-medium text-ink">Company baseline:</span> ₹{base.low}–{base.high} L lost per quarter to planning errors (₹18–22 L stockouts, ₹10–12 L overstock). This panel covers only the SKUs loaded here, so it is a fraction of that.
+              <span className="font-medium text-ink">Company baseline:</span> ₹{base.low}–{base.high} L lost per quarter to planning errors (₹18–22 L stockouts, ₹10–12 L overstock). The figures above are modelled only from the stock and sales in your data.
             </p>
             {(impact.pricingIsPlaceholder || impact.pricingMissing) && (
               <p className="flex items-start gap-1.5 text-warn">
