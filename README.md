@@ -30,7 +30,8 @@ npm run db:setup               # same command; now targets Neon
 | `npm run db:seed` | Loads the CSVs (`-- --no-sample` skips illustrative metric series) |
 | `npm run db:setup` | Migrate + seed + full refresh |
 | `npm run db:reset -- --yes` | Drops every table (needs `--yes` on Neon) |
-| `npm test` | 28 unit tests: every rule threshold, alert detection |
+| `npm run dev:local` | Dev server on the embedded database with Gemini off, even if `.env.local` points at Neon — safe for trying the kill switch or approving POs. Seed it with `DATABASE_URL= GEMINI_API_KEY= npm run db:setup` |
+| `npm test` | 33 unit tests: every rule threshold, alert detection, kill-switch state |
 | `npm run typecheck` · `npm run lint` · `npm run build` | |
 
 ## The demand rules (`src/lib/engine/config.ts`)
@@ -47,6 +48,24 @@ npm run db:setup               # same command; now targets Neon
 Judgement calls the brief left open (all in `config.ts`/`rules.ts`): a stockout order is one standard lot, plus more lots until cover is within 5% of the minimum; open POs within 5% of the minimum count as covering the shortfall (so trimming a lot by a few units doesn't trigger a duplicate order).
 
 **Edge cases for Gemini** (the brief's 15–20%): new launches (<8 weeks), demand shifts >20%, volatile sales, rules that contradict the trend, and multi-lot shortfalls. On the supplied data that is 3 of 15 SKUs (20%).
+
+## Kill switch
+
+One control that stops all automation. Open it from the **Kill switch** button in the header (green dot = running, red = paused).
+
+| | |
+|---|---|
+| **Stops** | Planning-engine runs (button, daily refresh, `/api/ingest?refresh=1`), every Gemini call (commentary, brief, note parsing) and purchase-order sign-off |
+| **Keeps working** | All dashboards, the PO export, data ingestion, alert acknowledgement, and saving notes (parsed by rules) |
+| **Pause** | Needs a reason (≥5 characters). Instant for every user; a red banner appears on every page; recorded in `automation_events` with when and why (who = the role, until there are user accounts) |
+| **Resume** | Two clicks (Resume → Confirm); also logged |
+| **Hard stop** | Set `KILL_SWITCH=1` in Vercel and redeploy. Overrides the in-app switch and cannot be resumed from the app — remove the variable and redeploy |
+
+Enforcement is server-side, not just hidden buttons: `assertAutomationRunning()` guards the engine (`src/lib/intelligence.ts`), every Gemini call (`src/lib/ai/gemini.ts`) and the PO actions (`src/app/actions.ts`); the cron route returns a clean `{"skipped":true}`. State logic is in `src/lib/killswitch-state.ts` (unit-tested).
+
+## Guided tour
+
+The **Tour** button in the header runs a 19-step walkthrough of the whole platform: it navigates between pages, spotlights the element being explained and opens the kill-switch panel. Inside that panel, **Walk me through this** replays just the kill-switch steps. First-time visitors get a one-time prompt. Steps live in `src/components/tour-steps.ts`; any element can be targeted with a `data-tour="…"` attribute.
 
 ## Where the pieces live
 

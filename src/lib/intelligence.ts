@@ -2,6 +2,7 @@ import { runAlertChecks } from "./alerts/run";
 import { generateOpsBrief } from "./ai/brief";
 import { generateEdgeCommentary } from "./ai/commentary";
 import { query } from "./db";
+import { assertAutomationRunning } from "./killswitch";
 import { runEngine, type EngineRunResult } from "./engine/run";
 import { refreshStateMetrics, refreshWeeklyMetrics } from "./metrics/snapshot";
 
@@ -17,7 +18,10 @@ export interface RefreshSummary {
  * The end-to-end refresh used by the "Run planning engine" button and the scheduled job:
  * rules → draft POs → metrics → anomaly checks → Gemini commentary → executive brief.
  */
-export async function refreshIntelligence(opts: { commentary?: boolean; brief?: boolean } = {}): Promise<RefreshSummary> {
+export async function refreshIntelligence(
+  opts: { commentary?: boolean; brief?: boolean; /** Maintenance scripts only (db:setup). */ ignoreKillSwitch?: boolean } = {},
+): Promise<RefreshSummary> {
+  if (!opts.ignoreKillSwitch) await assertAutomationRunning("the planning engine");
   const run = await runEngine();
   const metricsWritten = await refreshWeeklyMetrics(run.asOf);
   await refreshStateMetrics(run.asOf);

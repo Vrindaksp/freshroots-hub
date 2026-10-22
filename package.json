@@ -12,7 +12,8 @@
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
     "db:setup": "tsx --env-file-if-exists=.env.local scripts/setup.ts",
-    "db:reset": "tsx --env-file-if-exists=.env.local scripts/reset.ts"
+    "db:reset": "tsx --env-file-if-exists=.env.local scripts/reset.ts",
+    "dev:local": "node scripts/dev-local.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.30.0",

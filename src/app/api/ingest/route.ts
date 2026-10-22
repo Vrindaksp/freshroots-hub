@@ -2,6 +2,7 @@ import { runAlertChecks } from "@/lib/alerts/run";
 import { hasValidBearer } from "@/lib/auth";
 import { jsonParam, query } from "@/lib/db";
 import { refreshIntelligence } from "@/lib/intelligence";
+import { getKillSwitch } from "@/lib/killswitch";
 import { METRIC_BY_NAME } from "@/lib/metrics/registry";
 import { upsertMetrics, type MetricRow } from "@/lib/metrics/snapshot";
 
@@ -116,10 +117,17 @@ export async function POST(request: Request) {
       counts.inventory = inventory.length;
     }
 
-    const refresh = new URL(request.url).searchParams.get("refresh") === "1";
-    const result = refresh ? await refreshIntelligence({ commentary: false, brief: false }) : undefined;
+    // Data is always stored; only the engine refresh is automation, so the kill switch skips just that part.
+    const refreshRequested = new URL(request.url).searchParams.get("refresh") === "1";
+    const paused = refreshRequested && (await getKillSwitch()).paused;
+    const result = refreshRequested && !paused ? await refreshIntelligence({ commentary: false, brief: false }) : undefined;
     const alerts = result ? result.alerts : await runAlertChecks();
-    return Response.json({ ingested: counts, alerts, engineRunId: result?.run.runId ?? null });
+    return Response.json({
+      ingested: counts,
+      alerts,
+      engineRunId: result?.run.runId ?? null,
+      engine: !refreshRequested ? "not_requested" : paused ? "skipped_automation_paused" : "ran",
+    });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : "Ingest failed" }, { status: 500 });
   }

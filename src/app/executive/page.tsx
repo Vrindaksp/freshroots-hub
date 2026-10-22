@@ -40,15 +40,17 @@ export default function ExecutivePage() {
       />
 
       <div className="space-y-5">
-        <Suspense fallback={<Skeleton className="h-16 w-full" />}>
-          <AlertsSection />
-        </Suspense>
+        <div data-tour="alerts">
+          <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+            <AlertsSection />
+          </Suspense>
+        </div>
 
         <Suspense fallback={<Skeleton className="h-56 w-full" />}>
           <ImpactSection />
         </Suspense>
 
-        <section aria-labelledby="metrics-h">
+        <section aria-labelledby="metrics-h" data-tour="metrics">
           <h2 id="metrics-h" className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-ink-3">
             Core operational metrics
           </h2>
@@ -123,7 +125,7 @@ async function ImpactSection() {
   ];
 
   return (
-    <Card>
+    <Card tour="impact">
       <div className="grid gap-0 lg:grid-cols-[minmax(280px,1fr)_2fr]">
         <div className="border-b border-line p-5 lg:border-b-0 lg:border-r">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-3">Net projected savings · this planning cycle</p>
@@ -219,7 +221,7 @@ async function RegionSection() {
   await connection();
   const { rows, weeks, latestWeek } = await getRegionalSales();
   return (
-    <Card className="xl:col-span-2">
+    <Card className="xl:col-span-2" tour="regions">
       <CardHeader
         title="Orders by region"
         subtitle={latestWeek ? `Latest complete week starting ${longDate(latestWeek)} vs the average of the 4 weeks before it` : undefined}
@@ -277,7 +279,7 @@ async function BriefSection() {
   await connection();
   const brief = await getLatestBrief();
   return (
-    <Card>
+    <Card tour="brief">
       <CardHeader
         title="Operations brief"
         subtitle={brief ? `${brief.source === "gemini" ? `Gemini · ${brief.model}` : "Rule-based summary"} · ${stampLabel(brief.createdAt)}` : "Not generated yet"}

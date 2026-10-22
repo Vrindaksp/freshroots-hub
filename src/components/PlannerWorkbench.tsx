@@ -107,7 +107,7 @@ export function PlannerWorkbench({
   return (
     <>
       {/* On wide screens the grid makes room for the drawer so the Decision column stays reachable. */}
-      <Card className={open ? "xl:mr-[480px]" : ""}>
+      <Card tour="grid" className={open ? "xl:mr-[480px]" : ""}>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
           <div role="tablist" aria-label="Filter SKUs" className="flex flex-wrap gap-1">
             {FILTERS.map((f) => (

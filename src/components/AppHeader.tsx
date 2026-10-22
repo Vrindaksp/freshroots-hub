@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
+import { startTour } from "./events";
 
 const VIEWS = [
   { href: "/executive", label: "Executive view", short: "Executive" },
@@ -55,7 +56,7 @@ function ThemeToggle() {
   );
 }
 
-export function AppHeader() {
+export function AppHeader({ controls }: { controls?: ReactNode }) {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-40 bg-navy text-slate-100 shadow-sm">
@@ -70,7 +71,7 @@ export function AppHeader() {
         </Link>
 
         <nav aria-label="Role view" className="ml-auto flex items-center gap-3 sm:ml-6">
-          <div role="tablist" className="flex rounded-lg bg-white/10 p-0.5">
+          <div role="tablist" data-tour="roles" className="flex rounded-lg bg-white/10 p-0.5">
             {VIEWS.map((v) => {
               const active = pathname.startsWith(v.href);
               return (
@@ -89,6 +90,19 @@ export function AppHeader() {
               );
             })}
           </div>
+          {controls}
+          <button
+            type="button"
+            onClick={() => startTour("platform")}
+            title="Guided tour of the platform and the kill switch"
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/15 px-2.5 py-1.5 text-[13px] font-medium text-slate-100 transition hover:bg-white/10"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="8" cy="8" r="6" />
+              <path d="M6.3 6.2a1.8 1.8 0 1 1 2.5 1.7c-.5.3-.8.6-.8 1.2M8 11.3v.1" />
+            </svg>
+            <span className="hidden md:inline">Tour</span>
+          </button>
           <ThemeToggle />
         </nav>
       </div>

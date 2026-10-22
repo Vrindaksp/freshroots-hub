@@ -1,5 +1,6 @@
 import { hasValidBearer } from "@/lib/auth";
 import { refreshIntelligence } from "@/lib/intelligence";
+import { getKillSwitch } from "@/lib/killswitch";
 
 export const maxDuration = 120;
 
@@ -13,6 +14,11 @@ export async function GET(request: Request) {
   const open = process.env.NODE_ENV !== "production" && !secret;
   if (!open && !hasValidBearer(request, secret)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // Kill switch: report a clean "skipped" (HTTP 200) so Vercel does not flag the scheduled run as failed.
+  const killSwitch = await getKillSwitch();
+  if (killSwitch.paused) {
+    return Response.json({ skipped: true, paused: true, source: killSwitch.source, reason: killSwitch.reason, since: killSwitch.since });
   }
   const { run, metricsWritten, alerts, commentaryGenerated, briefGenerated } = await refreshIntelligence();
   return Response.json({

@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { assertAutomationRunning } from "../killswitch";
 
 /**
  * Thin Gemini client for structured (JSON-schema) output. Server-side only: the API key never reaches the browser.
@@ -43,6 +44,8 @@ export async function generateStructured<T>(opts: {
   schema: Record<string, unknown>;
   temperature?: number;
 }): Promise<{ data: T; model: string }> {
+  // Single choke point for every Gemini call (commentary, brief, note parsing): the kill switch stops spend here.
+  await assertAutomationRunning("Gemini calls");
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
   client ??= new GoogleGenAI({ apiKey });

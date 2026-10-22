@@ -24,7 +24,7 @@ async function main() {
     await seedSampleOperationalMetrics(weeks.map((w) => w.wk));
   }
 
-  const result = await refreshIntelligence();
+  const result = await refreshIntelligence({ ignoreKillSwitch: true });
   const { run } = result;
   console.log(`\nEngine run #${run.runId} as of ${run.asOf} (festival uplift ${run.uplift * 100}%)`);
   console.log(`  ${run.reorder} reorder · ${run.pause} paused · ${run.hold} hold · ${run.edgeCases} edge cases for Gemini review`);

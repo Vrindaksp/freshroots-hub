@@ -39,8 +39,8 @@ export function Badge({ tone = "neutral", children, icon = false, title, classNa
   );
 }
 
-export function Card({ children, className = "", as: Tag = "section" }: { children: ReactNode; className?: string; as?: "section" | "div" | "article" }) {
-  return <Tag className={`rounded-xl border border-line bg-surface shadow-[var(--shadow)] ${className}`}>{children}</Tag>;
+export function Card({ children, className = "", as: Tag = "section", tour }: { children: ReactNode; className?: string; as?: "section" | "div" | "article"; tour?: string }) {
+  return <Tag data-tour={tour} className={`rounded-xl border border-line bg-surface shadow-[var(--shadow)] ${className}`}>{children}</Tag>;
 }
 
 export function CardHeader({ title, subtitle, right }: { title: ReactNode; subtitle?: ReactNode; right?: ReactNode }) {

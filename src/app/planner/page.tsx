@@ -28,7 +28,9 @@ export default function PlannerPage() {
               Export approved POs
             </a>
             <ApproveCleanButton />
-            <RunEngineButton />
+            <span data-tour="run-engine">
+              <RunEngineButton />
+            </span>
           </>
         }
       />
@@ -99,7 +101,7 @@ async function PlannerBody() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div data-tour="planner-tiles" className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Tile label="Draft POs awaiting you" value={String(drafts.length)} sub={`${formatINRCompact(draftValue)} at cost`} tone={drafts.length ? "accent" : undefined} />
         <Tile label="Stockout risk" value={String(stockout.length)} sub={stockout.slice(0, 2).map((r) => r.name.replace(/^Freshroots /, "")).join(", ") || "None"} tone={stockout.length ? "crit" : "ok"} />
         <Tile label="Overstock (orders paused)" value={String(overstock.length)} sub={overstock.map((r) => r.name.replace(/^Freshroots /, "")).join(", ") || "None"} tone={overstock.length ? "warn" : "ok"} />
@@ -153,7 +155,7 @@ async function PlannerBody() {
           )}
         </Card>
 
-        <Card>
+        <Card tour="rules">
           <CardHeader title="Rules in force" subtitle="Defined in src/lib/engine/config.ts" />
           <ul className="space-y-2 p-4 text-[13px] text-ink-2">
             <li><span className="font-medium text-ink">High demand:</span> 4-week average more than 20% over the 12-week average → reorder 1.5× standard quantity.</li>
