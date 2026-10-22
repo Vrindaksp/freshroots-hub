@@ -71,18 +71,18 @@ src/app/api/                      ingest · cron/refresh · purchase-orders/expo
 
 ## Deployment
 
-Live on Vercel: **https://freshroots-hub.vercel.app** (password-protected). GitHub → Vercel auto-deploys every push to `main`.
+Live on Vercel: **https://freshroots-hub.vercel.app** (open, no sign-in). GitHub → Vercel auto-deploys every push to `main`.
 
-Production environment variables (Vercel → Settings → Environment Variables): `DATABASE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `APP_PASSWORD`, `INGEST_TOKEN`, `CRON_SECRET`. Secrets are stored as sensitive; values live only in Vercel and your local `.env.local`.
+Production environment variables (Vercel → Settings → Environment Variables): `DATABASE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `INGEST_TOKEN`, `CRON_SECRET`. Secrets are stored as sensitive; values live only in Vercel and your local `.env.local`.
 
-- **Access:** the whole app sits behind HTTP Basic auth (`src/proxy.ts`): any username, password = `APP_PASSWORD`. If the variable is missing, production returns 503 instead of opening up.
+- **Access:** there is no sign-in — anyone with the URL can use every page, approve purchase orders and trigger Gemini calls. `/api/ingest` and `/api/cron` still require their own bearer tokens. Add Vercel Authentication or SSO before sharing the link widely.
 - **Database:** Neon project `freshroots-hub`. Reload seed data any time with `npm run db:setup` (reads `.env.local`).
 - **Scheduled refresh:** `vercel.json` runs `/api/cron/refresh` daily at 06:00 IST.
 - **Rotating a secret:** change it in Vercel, then redeploy (`vercel deploy --prod`) — env changes apply to new deployments only.
 
 ## Not done yet — read before real use
 
-- **Shared password, not user accounts.** Everyone uses the same `APP_PASSWORD`, and decisions are logged as the role `demand-planner`, not a person. Move to Vercel Authentication or SSO when per-person audit trails matter, then thread the user identity into `src/app/actions.ts`.
+- **No user accounts.** Decisions are logged as the role `demand-planner`, not a person. Add Vercel Authentication or SSO, then thread the user identity into `src/app/actions.ts`.
 - **Placeholder prices** drive every ₹ figure (see `data/seed/README.md`).
 - **Sample metrics:** fulfillment, on-time delivery, complaints and write-offs are illustrative until a feed is connected.
 - **Rupee impact is a model**, not accounting. Assumptions (realisation 60%, write-off 50% perishable / 10% other) are in `IMPACT_ASSUMPTIONS`; tune them with finance's history.
