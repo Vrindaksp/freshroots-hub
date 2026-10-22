@@ -69,15 +69,20 @@ src/app/api/                      ingest · cron/refresh · purchase-orders/expo
 - **SAP/Excel replacement:** `POST /api/ingest` (Bearer `INGEST_TOKEN`) accepts `metrics`, daily `sales` and `inventory` rows. Daily sales rows make the **regional-pace alert** work mid-week (a region >15% below its 4-week pace, pro-rated for the days elapsed). Add `?refresh=1` to re-run the engine.
 - **Scheduled refresh:** `vercel.json` runs `/api/cron/refresh` daily (06:00 IST) with `CRON_SECRET`.
 
-## Deploy (GitHub → Vercel)
+## Deployment
 
-1. `git init`, commit, push to GitHub (the real `.env.local` is gitignored; `.env.example` is committed).
-2. Import the repo in Vercel and set `DATABASE_URL`, `GEMINI_API_KEY`, `INGEST_TOKEN`, `CRON_SECRET`.
-3. From your machine, run `npm run db:setup` once against Neon (it reads `.env.local`).
+Live on Vercel: **https://freshroots-hub.vercel.app** (password-protected). GitHub → Vercel auto-deploys every push to `main`.
+
+Production environment variables (Vercel → Settings → Environment Variables): `DATABASE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`, `APP_PASSWORD`, `INGEST_TOKEN`, `CRON_SECRET`. Secrets are stored as sensitive; values live only in Vercel and your local `.env.local`.
+
+- **Access:** the whole app sits behind HTTP Basic auth (`src/proxy.ts`): any username, password = `APP_PASSWORD`. If the variable is missing, production returns 503 instead of opening up.
+- **Database:** Neon project `freshroots-hub`. Reload seed data any time with `npm run db:setup` (reads `.env.local`).
+- **Scheduled refresh:** `vercel.json` runs `/api/cron/refresh` daily at 06:00 IST.
+- **Rotating a secret:** change it in Vercel, then redeploy (`vercel deploy --prod`) — env changes apply to new deployments only.
 
 ## Not done yet — read before real use
 
-- **No sign-in.** Anyone who can open the URL can approve POs; decisions are attributed to the role `demand-planner`, not a person. Put it behind Vercel Authentication or SSO, then thread the user's identity into `src/app/actions.ts`.
+- **Shared password, not user accounts.** Everyone uses the same `APP_PASSWORD`, and decisions are logged as the role `demand-planner`, not a person. Move to Vercel Authentication or SSO when per-person audit trails matter, then thread the user identity into `src/app/actions.ts`.
 - **Placeholder prices** drive every ₹ figure (see `data/seed/README.md`).
 - **Sample metrics:** fulfillment, on-time delivery, complaints and write-offs are illustrative until a feed is connected.
 - **Rupee impact is a model**, not accounting. Assumptions (realisation 60%, write-off 50% perishable / 10% other) are in `IMPACT_ASSUMPTIONS`; tune them with finance's history.
