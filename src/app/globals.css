@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* Class-based dark mode so the header toggle and the OS preference both work. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens. Components use semantic names (bg-surface, text-ink-2, border-line) so light and dark
+ * are swapped in exactly one place.
+ *   Light: #F8FAFC canvas, navy #1E293B primary, indigo accent.
+ *   Dark:  #0F172A canvas.
+ *   Status: emerald = healthy/savings, amber = warning, crimson = stockout/write-off risk (muted, never neon).
+ */
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --ink: #0f172a;
+  --ink-2: #475569;
+  --ink-3: #64748b;
+  --navy: #1e293b;
+  --accent: #4452c4;
+  --accent-ink: #ffffff;
+  --accent-soft: #eceefb;
+  --ok: #047857;
+  --ok-soft: #e8f6ef;
+  --warn: #a8530a;
+  --warn-soft: #fcf3e1;
+  --crit: #b0323c;
+  --crit-soft: #fbecee;
+  --info: #475569;
+  --info-soft: #eef2f6;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+
+  /* Categorical series (validated palette, slots 1-3: safe all-pairs for colour-vision deficiency). */
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --grid: #e1e5ea;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --surface: #1a2438;
+  --surface-2: #223049;
+  --line: #2b3a54;
+  --line-strong: #3b4d6b;
+  --ink: #f1f5f9;
+  --ink-2: #cbd5e1;
+  --ink-3: #94a3b8;
+  --navy: #0b1220;
+  --accent: #8b95f0;
+  --accent-ink: #0f172a;
+  --accent-soft: #252f57;
+  --ok: #4cc79a;
+  --ok-soft: #12302a;
+  --warn: #e9b14f;
+  --warn-soft: #382c14;
+  --crit: #ee7f87;
+  --crit-soft: #3a1e26;
+  --info: #a9b6c9;
+  --info-soft: #223049;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #199e70;
+  --grid: #26334b;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-navy: var(--navy);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-crit: var(--crit);
+  --color-crit-soft: var(--crit-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Tables: sticky header inside a scrolling container. */
+.grid-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-2);
+  box-shadow: inset 0 -1px 0 var(--line-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@keyframes fr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.fr-skeleton {
+  background: var(--surface-2);
+  border-radius: 6px;
+  animation: fr-pulse 1.6s ease-in-out infinite;
+}
