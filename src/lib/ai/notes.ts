@@ -101,7 +101,7 @@ export async function addPlannerNote(text: string, skuId: string | null, author:
   const clean = text.trim().slice(0, 2000);
   if (!clean) throw new Error("Note is empty");
 
-  const skus = await query<SkuRef>("select id, name from skus order by id");
+  const skus = await query<SkuRef>("select id, name from skus where archived_at is null order by id");
   let parsed: ParsedNote;
   let source: "gemini" | "rules" = "rules";
   if (geminiConfigured()) {

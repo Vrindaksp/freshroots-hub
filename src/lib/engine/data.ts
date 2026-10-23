@@ -109,6 +109,7 @@ export async function loadEngineInputs(asOf: string, config: EngineConfig = DEFA
        from skus s
        left join distributors d on d.id = s.distributor_id
        left join inventory_levels i on i.sku_id = s.id
+       where s.archived_at is null
        group by s.id, d.id
        order by s.id`,
     ),

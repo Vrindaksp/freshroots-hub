@@ -87,7 +87,7 @@ export async function runAlertChecks(asOfOverride?: string): Promise<{ active: n
               s.min_stock_weeks::float8 as min_weeks, s.max_stock_weeks::float8 as max_weeks,
               d.trend_pct as trend, d.action, d.recommended_qty as qty
        from demand_signals d join skus s on s.id = d.sku_id
-       where d.run_id = $1`,
+       where d.run_id = $1 and s.archived_at is null`,
       [runId],
     );
     candidates.push(

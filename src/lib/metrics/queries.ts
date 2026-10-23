@@ -99,7 +99,7 @@ export async function getRegionalSales(): Promise<{ rows: RegionRow[]; latestWee
   );
   const meta = await query<{ region: string; skus: number; distributors: string[] }>(
     `select d.region, count(distinct s.id)::int as skus, array_agg(distinct d.name order by d.name) as distributors
-     from distributors d left join skus s on s.distributor_id = d.id
+     from distributors d left join skus s on s.distributor_id = d.id and s.archived_at is null
      group by d.region`,
   );
   const metaBy = new Map(meta.map((m) => [m.region, m]));

@@ -144,7 +144,7 @@ export function Tour() {
     if (seen) return null;
     return (
       <div role="dialog" aria-label="Take the tour" className="fixed bottom-4 right-4 z-[55] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-4 shadow-2xl">
-        <p className="text-[14px] font-semibold text-ink">New here? Take the 3-minute tour</p>
+        <p className="text-[14px] font-semibold text-ink">New here? Take the 4-minute tour</p>
         <p className="mt-1 text-[13px] text-ink-2">See what each page does, how to approve a purchase order, and how the kill switch works.</p>
         <div className="mt-3 flex gap-2">
           <button type="button" className={btnPrimary} onClick={() => startTour("platform")}>

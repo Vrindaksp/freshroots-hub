@@ -49,6 +49,7 @@ export function deriveKillSwitchState(hardStop: boolean, latest: AutomationEvent
 export const KILL_SWITCH_STOPS = [
   "Planning engine runs (the button, the daily refresh, and ingest with refresh)",
   "Every Gemini call: edge-case commentary, executive brief, note parsing",
+  "Zoho pushes: purchase orders and items sent to Zoho",
   "Purchase-order sign-off: approve, override, reject and bulk approve",
 ];
 

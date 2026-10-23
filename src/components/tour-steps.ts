@@ -18,7 +18,7 @@ const welcome: TourStep = {
   id: "welcome",
   section: "Welcome",
   title: "Welcome to the Freshroots hub",
-  body: "One platform, two jobs, one database. It works out what to reorder (Demand planner view) and shows how operations are doing (Executive view). The database is loaded from your stock, sales, SKU, distributor and calendar files. This tour takes about three minutes and finishes with the kill switch.",
+  body: "One platform, two jobs, one database. It works out what to reorder (Demand planner view) and shows how operations are doing (Executive view). It also manages your SKU catalogue and connects to Zoho Inventory. The database is loaded from your stock, sales, SKU, distributor and calendar files. This tour takes about four minutes and finishes with the kill switch.",
 };
 
 const roles: TourStep = {
@@ -119,6 +119,51 @@ const rules: TourStep = {
   body: "High demand is +20% over the 12-week average (order 1.5× the standard quantity), reorder below 6 weeks of cover, pause above 14, +25% demand in October, November and March, and a strict 3–4 week window for perishables. They all live in one config file.",
 };
 
+const skuAdd: TourStep = {
+  id: "sku-add",
+  section: "SKU catalogue",
+  title: "Add a SKU by hand",
+  path: "/skus",
+  target: "sku-add",
+  body: "Press + Add SKU and fill in the name, category, perishability, standard order quantity and distributor. Cost, price and opening stock are optional. A new SKU has no sales history, so after the next planning-engine run the engine treats it as a new launch and sends it to Gemini for review.",
+};
+
+const skuTable: TourStep = {
+  id: "sku-table",
+  section: "SKU catalogue",
+  title: "Edit or remove",
+  path: "/skus",
+  target: "sku-table",
+  body: "Remove hides a SKU from the planner, engine, alerts and dashboards and drops its open draft POs, but keeps its sales history and past POs, and you can restore it (tick Show removed). Only a removed SKU with no history can be deleted permanently.",
+};
+
+const zohoConnect: TourStep = {
+  id: "zoho-connection",
+  section: "Zoho",
+  title: "The Zoho connection",
+  path: "/zoho",
+  target: "zoho-connection",
+  body: "Zoho credentials live in server environment variables and never reach the browser. Test connection runs a read-only check that creates nothing. If it is not connected yet, the setup guide here walks through getting the credentials.",
+};
+
+const zohoPush: TourStep = {
+  id: "zoho-push",
+  section: "Zoho",
+  title: "Send purchase orders to Zoho",
+  path: "/zoho",
+  target: "zoho-push",
+  body: "Preview shows exactly what would be sent. Push creates each approved PO in Zoho Inventory as a draft (plus the item and vendor if they are missing). Repeating it never duplicates: a PO already in Zoho is linked instead, and a failed PO keeps its error so it can be retried.",
+};
+
+const zohoExport: TourStep = {
+  id: "zoho-export",
+  section: "Zoho",
+  title: "Prefer files?",
+  path: "/zoho",
+  target: "zoho-export",
+  body: "Download your items and approved purchase orders as CSV and bring them into Zoho with its import wizard. This works without any connection.",
+};
+
 const killIntro: TourStep = {
   id: "ks-intro",
   section: "Kill switch",
@@ -142,7 +187,7 @@ const ksScope: TourStep = {
   title: "What it stops, and what it doesn't",
   target: "ks-scope",
   openKill: true,
-  body: "Pausing stops engine runs (the button and the daily refresh), every Gemini call and purchase-order sign-off. Dashboards, the PO export, data ingestion and alert acknowledgement keep working, so you can still look around while it is paused.",
+  body: "Pausing stops engine runs (the button and the daily refresh), every Gemini call, purchase-order sign-off and Zoho pushes. Dashboards, file exports, data ingestion and alert acknowledgement keep working, so you can still look around while it is paused.",
 };
 
 const ksAction: TourStep = {
@@ -187,6 +232,6 @@ const donePlatform: TourStep = {
 };
 
 export const TOURS: Record<TourId, TourStep[]> = {
-  platform: [welcome, roles, alerts, impact, metrics, regions, brief, plannerTiles, grid, decide, runEngine, rules, killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, donePlatform],
+  platform: [welcome, roles, alerts, impact, metrics, regions, brief, plannerTiles, grid, decide, runEngine, rules, skuAdd, skuTable, zohoConnect, zohoPush, zohoExport, killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, donePlatform],
   killswitch: [killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, doneKill],
 };

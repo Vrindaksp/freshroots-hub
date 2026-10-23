@@ -121,7 +121,7 @@ export async function refreshStateMetrics(asOf?: string): Promise<void> {
     `select d.sku_id, d.on_hand, d.effective_weekly_demand as eff, d.flags,
             s.perishability_flag as perishable, s.max_stock_weeks::float8 as max_weeks, s.unit_cost_inr::float8 as unit_cost
      from demand_signals d join skus s on s.id = d.sku_id
-     where d.run_id = $1`,
+     where d.run_id = $1 and s.archived_at is null`,
     [runId],
   );
 

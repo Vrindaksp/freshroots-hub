@@ -31,7 +31,7 @@ npm run db:setup               # same command; now targets Neon
 | `npm run db:setup` | Migrate + seed + full refresh |
 | `npm run db:reset -- --yes` | Drops every table (needs `--yes` on Neon) |
 | `npm run dev:local` | Dev server on the embedded database with Gemini off, even if `.env.local` points at Neon — safe for trying the kill switch or approving POs. Seed it with `DATABASE_URL= GEMINI_API_KEY= npm run db:setup` |
-| `npm test` | 33 unit tests: every rule threshold, alert detection, kill-switch state |
+| `npm test` | 63 unit tests: every rule threshold, alert detection, kill-switch state, SKU validation, Zoho client and push logic |
 | `npm run typecheck` · `npm run lint` · `npm run build` | |
 
 ## The demand rules (`src/lib/engine/config.ts`)
@@ -49,6 +49,27 @@ Judgement calls the brief left open (all in `config.ts`/`rules.ts`): a stockout 
 
 **Edge cases for Gemini** (the brief's 15–20%): new launches (<8 weeks), demand shifts >20%, volatile sales, rules that contradict the trend, and multi-lot shortfalls. On the supplied data that is 3 of 15 SKUs (20%).
 
+## SKU catalogue (add and remove SKUs by hand)
+
+Open **SKUs** in the header.
+
+- **Add:** name, category, perishability, standard order quantity and distributor are required; cost, price, opening stock and warehouse are optional. The ID is auto-numbered (`SKU016`) unless you type one. The SKU joins the planner after the next planning-engine run, where — having no sales history yet — it is treated as a *new launch* and sent to Gemini for review. Build its history by pushing sales through `/api/ingest`.
+- **Edit:** name, category, perishability, lot size, distributor, cost and price. Entering a cost or price marks it as *manual*, which removes the "Placeholder" tag and stops `db:seed` from overwriting it.
+- **Remove = archive.** The SKU leaves the planner, the engine, alerts, dashboards and exports, and its open *draft* POs are dropped; its sales history and past POs are kept, so the numbers you already reported do not change. Restore it any time (**Show removed**).
+- **Delete permanently** is offered only for a removed SKU with no sales history and no decided POs (e.g. one added by mistake), and needs its ID typed to confirm. Anything with history stays archived.
+- Every change is recorded in `sku_events`. Removing a SKU does not change Zoho.
+
+## Zoho Inventory
+
+Open **Zoho** in the header.
+
+- **Connection:** set `ZOHO_DC`, `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN` and `ZOHO_ORGANIZATION_ID` (the page has a step-by-step guide; scopes needed: items, purchase orders and contacts create/read, plus settings read). **Test connection** is read-only.
+- **Purchase orders → Zoho:** **Preview** shows exactly what would be sent (built from the database; works without credentials). **Push** creates each approved PO in Zoho as a *draft* purchase order, creating the item (matched by SKU code) and the vendor (matched by distributor name) first if missing. A PO is looked up by its reference (`FR-PO-000001`) before creating, so repeating a push links to what is already there instead of duplicating; a failed PO keeps its error and can be retried.
+- **Items → Zoho:** **Sync to Zoho** per SKU, or **Sync all to Zoho**, creates or links Zoho items by SKU code.
+- **Files instead:** `/api/zoho/export?type=items` and `?type=purchase-orders` return CSV for Zoho's import wizard (add `&format=json` for JSON); they need no credentials.
+- Zoho pushes are stopped by the **kill switch**; every call is logged in `zoho_sync_log`.
+- Live-tested against a real Zoho Inventory organisation (India data centre): connection test, item creation and idempotent re-sync. The purchase-order and vendor create calls follow Zoho's documented API and are covered by unit tests; use **Preview** and push one PO first.
+
 ## Kill switch
 
 One control that stops all automation. Open it from the **Kill switch** button in the header (green dot = running, red = paused).
@@ -65,7 +86,7 @@ Enforcement is server-side, not just hidden buttons: `assertAutomationRunning()`
 
 ## Guided tour
 
-The **Tour** button in the header runs a 19-step walkthrough of the whole platform: it navigates between pages, spotlights the element being explained and opens the kill-switch panel. Inside that panel, **Walk me through this** replays just the kill-switch steps. First-time visitors get a one-time prompt. Steps live in `src/components/tour-steps.ts`; any element can be targeted with a `data-tour="…"` attribute.
+The **Tour** button in the header runs a 24-step walkthrough of the whole platform (including SKUs and Zoho): it navigates between pages, spotlights the element being explained and opens the kill-switch panel. Inside that panel, **Walk me through this** replays just the kill-switch steps. First-time visitors get a one-time prompt. Steps live in `src/components/tour-steps.ts`; any element can be targeted with a `data-tour="…"` attribute.
 
 ## Where the pieces live
 

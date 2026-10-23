@@ -78,7 +78,7 @@ export async function getImpact(): Promise<ImpactSummary> {
      from demand_signals d
      join skus s on s.id = d.sku_id
      join engine_runs e on e.id = d.run_id
-     where d.run_id = $1`,
+     where d.run_id = $1 and s.archived_at is null`,
     [runId],
   );
 

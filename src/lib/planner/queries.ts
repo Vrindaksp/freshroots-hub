@@ -88,7 +88,7 @@ export async function getPlannerData(): Promise<PlannerData> {
          where p.sku_id = d.sku_id and (p.status = 'draft' or p.decided_at >= e.as_of)
          order by (p.status = 'draft') desc, p.id desc limit 1
        ) po on true
-       where d.run_id = $1
+       where d.run_id = $1 and s.archived_at is null
        order by s.id`,
       [runId],
     ),

@@ -60,7 +60,7 @@ async function gather() {
       ? []
       : query<{ name: string; action: string; qty: number; cover: number | null; flags: string[]; edge: boolean }>(
           `select s.name, d.action, d.recommended_qty as qty, d.cover_weeks as cover, d.flags, d.is_edge_case as edge
-           from demand_signals d join skus s on s.id = d.sku_id where d.run_id = $1 and d.action <> 'hold' order by s.id`,
+           from demand_signals d join skus s on s.id = d.sku_id where d.run_id = $1 and d.action <> 'hold' and s.archived_at is null order by s.id`,
           [runId],
         ),
     queryOne<{ n: number; cost: number }>(

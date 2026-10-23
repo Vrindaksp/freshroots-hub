@@ -96,7 +96,7 @@ async function loadContext(runId: number, skuId: string): Promise<Context | unde
     ? await query<{ sku: string; trend: number }>(
         `select s.name as sku, d.trend_pct as trend
          from demand_signals d join skus s on s.id = d.sku_id
-         where d.run_id = $1 and s.distributor_id = $2 and d.sku_id <> $3
+         where d.run_id = $1 and s.distributor_id = $2 and d.sku_id <> $3 and s.archived_at is null
          order by s.id`,
         [runId, row.distributor_id, skuId],
       )
@@ -239,7 +239,8 @@ export async function generateEdgeCommentary(runId: number, opts: { force?: bool
     `select d.sku_id,
             (select o.source from ai_outputs o where o.kind = 'edge_case' and o.run_id = d.run_id and o.sku_id = d.sku_id order by o.id desc limit 1) as source
      from demand_signals d
-     where d.run_id = $1 and d.is_edge_case`,
+     where d.run_id = $1 and d.is_edge_case
+       and exists (select 1 from skus k where k.id = d.sku_id and k.archived_at is null)`,
     [runId],
   );
   const live = geminiConfigured();

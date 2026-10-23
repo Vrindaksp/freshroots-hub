@@ -142,7 +142,7 @@ export async function ingestSeedData(log: (msg: string) => void = console.log): 
     await query(
       `update skus set unit_cost_inr = t.cost, unit_price_inr = t.price, pricing_source = t.source
        from json_to_recordset($1::json) as t(id text, cost numeric, price numeric, source text)
-       where skus.id = t.id`,
+       where skus.id = t.id and coalesce(skus.pricing_source, 'placeholder') <> 'manual'`,
       [
         jsonParam(
           pricing.map((r) => ({

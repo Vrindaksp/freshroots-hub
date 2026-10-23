@@ -8,6 +8,8 @@ import { startTour } from "./events";
 const VIEWS = [
   { href: "/executive", label: "Executive view", short: "Executive" },
   { href: "/planner", label: "Demand planner view", short: "Planner" },
+  { href: "/skus", label: "SKUs", short: "SKUs" },
+  { href: "/zoho", label: "Zoho", short: "Zoho" },
 ];
 
 function subscribeTheme(onChange: () => void) {
@@ -84,8 +86,8 @@ export function AppHeader({ controls }: { controls?: ReactNode }) {
                     active ? "bg-white text-slate-900 shadow-sm" : "text-slate-300 hover:text-white"
                   }`}
                 >
-                  <span className="sm:hidden">{v.short}</span>
-                  <span className="hidden sm:inline">{v.label}</span>
+                  <span className="lg:hidden">{v.short}</span>
+                  <span className="hidden lg:inline">{v.label}</span>
                 </Link>
               );
             })}
