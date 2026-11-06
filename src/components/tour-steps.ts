@@ -164,6 +164,24 @@ const zohoExport: TourStep = {
   body: "Download your items and approved purchase orders as CSV and bring them into Zoho with its import wizard. This works without any connection.",
 };
 
+const decisionChecks: TourStep = {
+  id: "decision-checks",
+  section: "Pre-build decision",
+  title: "Nine checks, five areas",
+  path: "/decision",
+  target: "decision-checks",
+  body: "Problem reality, workflow repeatability, input availability, output value and ROI. Each check shows live numbers from the system beside it, and you answer Pass, Partial, Fail or Not assessed with your own evidence note. Answers save as you go.",
+};
+
+const decisionOutcome: TourStep = {
+  id: "decision-outcome",
+  section: "Pre-build decision",
+  title: "Record the go / no-go call",
+  path: "/decision",
+  target: "decision-outcome",
+  body: "The checklist suggests STOP BUILD, PAUSE, REBUILD SMALLER or CONTINUE, but a person decides and gives a reason. Choosing PAUSE or STOP BUILD can also pause all automation in the same step. Every decision is kept with a snapshot of the nine answers.",
+};
+
 const killIntro: TourStep = {
   id: "ks-intro",
   section: "Kill switch",
@@ -232,6 +250,6 @@ const donePlatform: TourStep = {
 };
 
 export const TOURS: Record<TourId, TourStep[]> = {
-  platform: [welcome, roles, alerts, impact, metrics, regions, brief, plannerTiles, grid, decide, runEngine, rules, skuAdd, skuTable, zohoConnect, zohoPush, zohoExport, killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, donePlatform],
+  platform: [welcome, roles, alerts, impact, metrics, regions, brief, plannerTiles, grid, decide, runEngine, rules, skuAdd, skuTable, zohoConnect, zohoPush, zohoExport, decisionChecks, decisionOutcome, killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, donePlatform],
   killswitch: [killIntro, ksStatus, ksScope, ksAction, ksHard, ksLog, doneKill],
 };

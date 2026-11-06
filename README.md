@@ -31,7 +31,7 @@ npm run db:setup               # same command; now targets Neon
 | `npm run db:setup` | Migrate + seed + full refresh |
 | `npm run db:reset -- --yes` | Drops every table (needs `--yes` on Neon) |
 | `npm run dev:local` | Dev server on the embedded database with Gemini off, even if `.env.local` points at Neon — safe for trying the kill switch or approving POs. Seed it with `DATABASE_URL= GEMINI_API_KEY= npm run db:setup` |
-| `npm test` | 63 unit tests: every rule threshold, alert detection, kill-switch state, SKU validation, Zoho client and push logic |
+| `npm test` | 73 unit tests: every rule threshold, alert detection, kill-switch state, SKU validation, Zoho client and push logic, pre-build decision logic |
 | `npm run typecheck` · `npm run lint` · `npm run build` | |
 
 ## The demand rules (`src/lib/engine/config.ts`)
@@ -84,9 +84,20 @@ One control that stops all automation. Open it from the **Kill switch** button i
 
 Enforcement is server-side, not just hidden buttons: `assertAutomationRunning()` guards the engine (`src/lib/intelligence.ts`), every Gemini call (`src/lib/ai/gemini.ts`) and the PO actions (`src/app/actions.ts`); the cron route returns a clean `{"skipped":true}`. State logic is in `src/lib/killswitch-state.ts` (unit-tested).
 
+## Pre-build decision (the go / no-go checklist)
+
+Open **Decision** in the header. This is the gate that sits *before* the build, as opposed to the kill switch, which pauses a build that is already running.
+
+- **Nine checks in five areas:** problem reality, workflow repeatability, input availability, output value and ROI (`src/lib/decision/checks.ts`). Each is answered **Pass / Partial / Fail / Not assessed**, with an evidence note that saves when you click away.
+- **Live evidence** sits beside each check (sales rows and weeks, how old the stock snapshot is, PO decisions, Zoho links, how many metrics are still samples, modelled savings). It informs the answer; it never sets it (`src/lib/decision/evidence.ts`).
+- **A suggestion, not a verdict.** Once all nine are answered the page suggests an outcome: a failed foundation check (cost of the problem, people affected, input present) → **STOP BUILD**; any other fail → **REBUILD SMALLER**; any partial → **PAUSE**; otherwise **CONTINUE** (`src/lib/decision/logic.ts`, unit-tested).
+- **A person decides.** Choose an outcome, give a reason (10+ characters) and record it. For STOP BUILD or PAUSE you can tick *Also pause all automation now*, which flips the kill switch in the same step. Every decision is appended to `build_decisions` with a frozen snapshot of the nine answers, so the history shows what was known at the time.
+- **The nine questions are a draft.** They were derived from the five areas on the case's components map, not copied from the case's own checklist. If the case spells out exact questions, edit `checks.ts` (answers are keyed by `check_key`, so rewording does not lose saved answers).
+- Needs migration `004_build_decision.sql` (`npm run db:migrate`). Until it runs, the page shows every check as not assessed instead of failing.
+
 ## Guided tour
 
-The **Tour** button in the header runs a 24-step walkthrough of the whole platform (including SKUs and Zoho): it navigates between pages, spotlights the element being explained and opens the kill-switch panel. Inside that panel, **Walk me through this** replays just the kill-switch steps. First-time visitors get a one-time prompt. Steps live in `src/components/tour-steps.ts`; any element can be targeted with a `data-tour="…"` attribute.
+The **Tour** button in the header runs a 26-step walkthrough of the whole platform (including SKUs, Zoho and the pre-build decision): it navigates between pages, spotlights the element being explained and opens the kill-switch panel. Inside that panel, **Walk me through this** replays just the kill-switch steps. First-time visitors get a one-time prompt. Steps live in `src/components/tour-steps.ts`; any element can be targeted with a `data-tour="…"` attribute.
 
 ## Where the pieces live
 
@@ -100,12 +111,14 @@ src/lib/metrics/                  the 12-metric registry · derived snapshots ·
 src/lib/ai/                       Gemini client · edge-case commentary · note parsing · executive brief
 src/lib/impact.ts                 rupee-impact model (assumptions in config.ts)
 src/app/actions.ts                server actions: approve / reject / override, run engine, acknowledge, Gemini calls
-src/app/api/                      ingest · cron/refresh · purchase-orders/export
+src/app/api/                      ingest · cron/refresh · purchase-orders/export · zoho/export
+src/lib/decision/                 pre-build checklist: checks.ts (the nine questions) · logic.ts (suggestion, tested) · store.ts · evidence.ts
+src/lib/zoho/ · src/lib/skus/     Zoho Inventory client and sync · SKU validation and queries
 ```
 
 ## Integrations
 
-- **Zoho Inventory (staging):** approving a PO stores a Zoho "Create Purchase Order"–shaped payload (`purchase_orders.zoho_payload`, status `staged`). `GET /api/purchase-orders/export` returns it as JSON, or `?format=csv` for manual import. Nothing calls Zoho yet; `ZI-…`/`ZV-…` IDs are placeholders until the item/vendor mapping exists.
+- **Zoho Inventory:** approving a PO stores a Zoho "Create Purchase Order"–shaped payload (`purchase_orders.zoho_payload`, status `staged`). `GET /api/purchase-orders/export` returns it as JSON, or `?format=csv` for manual import. The **Zoho** page pushes approved POs and items to Zoho Inventory (see above); the sync is one-way, app → Zoho. Item prices set in the app are not written back to Zoho items after the first sync.
 - **SAP/Excel replacement:** `POST /api/ingest` (Bearer `INGEST_TOKEN`) accepts `metrics`, daily `sales` and `inventory` rows. Daily sales rows make the **regional-pace alert** work mid-week (a region >15% below its 4-week pace, pro-rated for the days elapsed). Add `?refresh=1` to re-run the engine.
 - **Scheduled refresh:** `vercel.json` runs `/api/cron/refresh` daily (06:00 IST) with `CRON_SECRET`.
 
@@ -126,5 +139,5 @@ Production environment variables (Vercel → Settings → Environment Variables)
 - **Placeholder prices** drive every ₹ figure (see `data/seed/README.md`).
 - **Sample metrics:** fulfillment, on-time delivery, complaints and write-offs are illustrative until a feed is connected.
 - **Rupee impact is a model**, not accounting. Assumptions (realisation 60%, write-off 50% perishable / 10% other) are in `IMPACT_ASSUMPTIONS`; tune them with finance's history.
-- **Verified against real services:** migration, seeding, the engine, PO approval/export and Gemini commentary/brief were run against a live Neon database and the Gemini API (`gemini-3.8-flash`). Not exercised: the Vercel deployment, the cron job, and the push-side of the Zoho hand-off (nothing calls Zoho yet).
+- **Verified against real services:** migration, seeding, the engine, PO approval/export and Gemini commentary/brief were run against a live Neon database and the Gemini API (`gemini-3.8-flash`). The Zoho connection test, item sync and draft-PO push were also run against a real Zoho Inventory organisation. Not confirmed: a scheduled cron run actually firing on Vercel.
 - Gemini commentary for a single SKU takes roughly 10–20 s (the model reasons before answering); the UI shows a "Thinking…" state.

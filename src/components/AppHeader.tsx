@@ -10,6 +10,7 @@ const VIEWS = [
   { href: "/planner", label: "Demand planner view", short: "Planner" },
   { href: "/skus", label: "SKUs", short: "SKUs" },
   { href: "/zoho", label: "Zoho", short: "Zoho" },
+  { href: "/decision", label: "Pre-build decision", short: "Decision" },
 ];
 
 function subscribeTheme(onChange: () => void) {
@@ -62,18 +63,19 @@ export function AppHeader({ controls }: { controls?: ReactNode }) {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-40 bg-navy text-slate-100 shadow-sm">
-      <div className="mx-auto flex h-14 w-full max-w-[1480px] items-center gap-4 px-4 sm:px-6">
-        <Link href="/executive" className="flex items-center gap-2.5">
+      <div className="mx-auto flex w-full max-w-[1480px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:px-6 md:min-h-14 md:flex-nowrap md:gap-x-4">
+        <Link href="/executive" className="order-1 flex shrink-0 items-center gap-2.5">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-[#5b6adf] text-[13px] font-bold text-white" aria-hidden>
             F
           </span>
-          <span className="hidden text-[15px] font-semibold tracking-tight sm:block">
+          <span className="hidden text-[15px] font-semibold tracking-tight lg:block">
             Freshroots <span className="font-normal text-slate-400">Operations Hub</span>
           </span>
         </Link>
 
-        <nav aria-label="Role view" className="ml-auto flex items-center gap-3 sm:ml-6">
-          <div role="tablist" data-tour="roles" className="flex rounded-lg bg-white/10 p-0.5">
+        {/* Phones: logo + controls on one row, tabs on their own scrollable row. Desktop: everything in one row. */}
+        <nav aria-label="Role view" className="order-3 w-full overflow-x-auto md:order-2 md:w-auto md:min-w-0 md:flex-1">
+          <div role="tablist" data-tour="roles" className="flex w-max rounded-lg bg-white/10 p-0.5">
             {VIEWS.map((v) => {
               const active = pathname.startsWith(v.href);
               return (
@@ -82,16 +84,18 @@ export function AppHeader({ controls }: { controls?: ReactNode }) {
                   href={v.href}
                   role="tab"
                   aria-selected={active}
-                  className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition ${
+                  className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition ${
                     active ? "bg-white text-slate-900 shadow-sm" : "text-slate-300 hover:text-white"
                   }`}
                 >
-                  <span className="lg:hidden">{v.short}</span>
-                  <span className="hidden lg:inline">{v.label}</span>
+                  <span className="xl:hidden">{v.short}</span>
+                  <span className="hidden xl:inline">{v.label}</span>
                 </Link>
               );
             })}
           </div>
+        </nav>
+        <div className="order-2 ml-auto flex shrink-0 items-center gap-2 md:order-3">
           {controls}
           <button
             type="button"
@@ -106,7 +110,7 @@ export function AppHeader({ controls }: { controls?: ReactNode }) {
             <span className="hidden md:inline">Tour</span>
           </button>
           <ThemeToggle />
-        </nav>
+        </div>
       </div>
     </header>
   );

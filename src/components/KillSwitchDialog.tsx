@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { setAutomation } from "@/app/actions";
 import { KILL_SWITCH_KEEPS, KILL_SWITCH_STOPS, type AutomationEvent, type KillSwitchState } from "@/lib/killswitch-state";
@@ -211,6 +212,14 @@ export function KillSwitchDialog({ state, events }: { state: KillSwitchState; ev
                 )}
               </section>
             </div>
+
+            <p className="border-t border-line px-5 py-3 text-xs text-ink-3">
+              Deciding whether the whole build should stop, pause or shrink? Use the{" "}
+              <Link href="/decision" onClick={() => setOpen(false)} className="font-medium text-accent hover:underline">
+                pre-build decision checklist
+              </Link>
+              .
+            </p>
 
             <footer className="flex items-center justify-between gap-3 border-t border-line px-5 py-3">
               <p className="text-xs text-ink-3">New here? The walkthrough shows each part of this panel.</p>
